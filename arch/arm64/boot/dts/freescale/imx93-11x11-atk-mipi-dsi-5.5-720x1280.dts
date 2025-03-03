@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 NXP
+ */
+#include "imx93-11x11-atk.dts"
+
+&lcdif {
+	status = "okay";
+	assigned-clock-rates = <650000000>, <65000000>, <400000000>, <133333333>;
+};
+
+&dphy {
+	status = "okay";
+};
+
+&dsi {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	panel@0 {
+		compatible = "alientek,hx839x";
+		reg = <0>;
+		himax,dsi-lanes = <4>;
+		reset-gpio = <&gpio4 29 GPIO_ACTIVE_LOW>;
+		vcc-supply = <&reg_vdd_5v>;
+		iovcc-supply = <&reg_vddio_1v8>;
+		backlight = <&backlight>;
+		status = "okay";
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi_out>;
+			};
+		};
+	};
+
+	ports {
+		port@1 {
+			reg = <1>;
+
+			dsi_out: endpoint {
+				remote-endpoint = <&panel_in>;
+			};
+		};
+	};
+};
+
+&lpi2c4 {
+    goodix_ts@14 {
+		compatible = "goodix,gt9271", "goodix,gt911";
+		reg = <0x14>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_ctp_int_dsi>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <12 IRQ_TYPE_EDGE_RISING>;
+		irq-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+};
+
+&iomuxc {
+	pinctrl_ctp_int_dsi: ctp_int_dsi_grp {
+		fsl,pins = <
+			MX93_PAD_SAI1_TXC__GPIO1_IO12			0x31e
+		>;
+	};
+
+	pinctrl_dsi_reset: dsi_reset_grp {
+		fsl,pins = <
+			MX93_PAD_CCM_CLKO4__GPIO4_IO29			0x31e
+		>;
+	};
+};
+
+&ldb {
+	status = "disabled";
+};
+
+&ldb_phy {
+	status = "disabled";
+};
